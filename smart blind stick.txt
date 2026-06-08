@@ -1,0 +1,70 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(13, A0, A1, A2, A3, A4);
+
+#define trigPin 9
+#define echoPin 8
+#define buzzer 11
+#define led 12
+
+long duration;
+int distance;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzer, OUTPUT);
+  pinMode(led, OUTPUT);
+
+  lcd.begin(16, 2);
+  lcd.print("Smart Stick");
+}
+
+void loop() {
+  // Ultrasonic trigger
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.034 / 2;
+
+  // LCD distance
+  lcd.setCursor(0, 1);
+  lcd.print("Dist: ");
+  lcd.print(distance);
+  lcd.print(" cm   ");
+
+  // 🔥 IMPORTANT RESET
+  digitalWrite(buzzer, LOW);
+
+  if (distance > 0 && distance < 15) {
+    lcd.setCursor(0, 0);
+    lcd.print("VERY CLOSE!   ");
+
+    digitalWrite(led, HIGH);
+    digitalWrite(buzzer, HIGH); // continuous
+  }
+  else if (distance >= 15 && distance < 40) {
+    lcd.setCursor(0, 0);
+    lcd.print("Be Careful    ");
+
+    digitalWrite(led, HIGH);
+
+    // proper beep
+    digitalWrite(buzzer, HIGH);
+    delay(200);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+  }
+  else {
+    lcd.setCursor(0, 0);
+    lcd.print("Safe          ");
+
+    digitalWrite(led, LOW);
+    digitalWrite(buzzer, LOW);
+  }
+}
